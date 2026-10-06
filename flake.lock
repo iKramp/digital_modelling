@@ -1,0 +1,151 @@
+{
+  "nodes": {
+    "f4pga-examples": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1711538572,
+        "narHash": "sha256-D9bbvmaRSxcszieXV6aONpG2vhZ48roxBVpmC1frdUg=",
+        "owner": "chipsalliance",
+        "repo": "f4pga-examples",
+        "rev": "13f11197b33dae1cde3bf146f317d63f0134eacf",
+        "type": "github"
+      },
+      "original": {
+        "owner": "chipsalliance",
+        "repo": "f4pga-examples",
+        "rev": "13f11197b33dae1cde3bf146f317d63f0134eacf",
+        "type": "github"
+      }
+    },
+    "f4pga-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1664913229,
+        "narHash": "sha256-o0vkMZ1P6qt5xbzsG2l84YniBFM1Hu+3Z4EQXhkfqvc=",
+        "owner": "chipsalliance",
+        "repo": "f4pga",
+        "rev": "e1cd038f06c7161b27afd0073fb507da2b8e5a9e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "chipsalliance",
+        "repo": "f4pga",
+        "rev": "e1cd038f06c7161b27afd0073fb507da2b8e5a9e",
+        "type": "github"
+      }
+    },
+    "flake-utils": {
+      "inputs": {
+        "systems": "systems"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1735563628,
+        "narHash": "sha256-OnSAY7XDSx7CtDoqNh8jwVwh4xNL/2HaJxGjryLWzX8=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "b134951a4c9f3c995fd7be05f3243f8ecd65d798",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-24.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "prjxray-db": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1639516656,
+        "narHash": "sha256-cU30ZtT+Olkcxzf/vopCT2d4IBG5vU9K3hHIvvy466c=",
+        "owner": "f4pga",
+        "repo": "prjxray-db",
+        "rev": "0a0addedd73e7e4139d52a6d8db4258763e0f1f3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "f4pga",
+        "ref": "0a0adde",
+        "repo": "prjxray-db",
+        "type": "github"
+      }
+    },
+    "prjxray-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1654973250,
+        "narHash": "sha256-/k48+0zRgbWoN7phdPHMY/8Igwtjda/dHvESmqhVMZk=",
+        "owner": "f4pga",
+        "repo": "prjxray",
+        "rev": "ae546d6b7648bf4df9cf63f0b25b2028b5623c43",
+        "type": "github"
+      },
+      "original": {
+        "owner": "f4pga",
+        "repo": "prjxray",
+        "rev": "ae546d6b7648bf4df9cf63f0b25b2028b5623c43",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "f4pga-examples": "f4pga-examples",
+        "f4pga-src": "f4pga-src",
+        "flake-utils": "flake-utils",
+        "nixpkgs": "nixpkgs",
+        "prjxray-db": "prjxray-db",
+        "prjxray-src": "prjxray-src",
+        "xc-fasm-src": "xc-fasm-src"
+      }
+    },
+    "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "xc-fasm-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1646070035,
+        "narHash": "sha256-QzBL759yS2TwWmN0FG+WIWhTjhvzLVSYHatYlQgkxW4=",
+        "owner": "chipsalliance",
+        "repo": "f4pga-xc-fasm",
+        "rev": "25dc605c9c0896204f0c3425b52a332034cf5e5c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "chipsalliance",
+        "repo": "f4pga-xc-fasm",
+        "rev": "25dc605c9c0896204f0c3425b52a332034cf5e5c",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
