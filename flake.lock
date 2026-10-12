@@ -85,23 +85,6 @@
         "type": "github"
       }
     },
-    "prjxray-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1654973250,
-        "narHash": "sha256-/k48+0zRgbWoN7phdPHMY/8Igwtjda/dHvESmqhVMZk=",
-        "owner": "f4pga",
-        "repo": "prjxray",
-        "rev": "ae546d6b7648bf4df9cf63f0b25b2028b5623c43",
-        "type": "github"
-      },
-      "original": {
-        "owner": "f4pga",
-        "repo": "prjxray",
-        "rev": "ae546d6b7648bf4df9cf63f0b25b2028b5623c43",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "f4pga-examples": "f4pga-examples",
@@ -109,8 +92,8 @@
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs",
         "prjxray-db": "prjxray-db",
-        "prjxray-src": "prjxray-src",
-        "xc-fasm-src": "xc-fasm-src"
+        "xc-fasm-src": "xc-fasm-src",
+        "yosys-f4pga-plugins": "yosys-f4pga-plugins"
       }
     },
     "systems": {
@@ -142,6 +125,23 @@
         "owner": "chipsalliance",
         "repo": "f4pga-xc-fasm",
         "rev": "25dc605c9c0896204f0c3425b52a332034cf5e5c",
+        "type": "github"
+      }
+    },
+    "yosys-f4pga-plugins": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1694004595,
+        "narHash": "sha256-XIn5wFw8i2njDN0Arua5BdZ0u1q6a/aJAs48YICehsc=",
+        "owner": "chipsalliance",
+        "repo": "yosys-f4pga-plugins",
+        "rev": "5471d1070b3048c1779c831cd36cc52773652265",
+        "type": "github"
+      },
+      "original": {
+        "owner": "chipsalliance",
+        "ref": "v1.20230906",
+        "repo": "yosys-f4pga-plugins",
         "type": "github"
       }
     }

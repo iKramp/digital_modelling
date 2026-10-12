@@ -2,16 +2,19 @@
 
 python3Packages.buildPythonPackage rec {
   pname = "f4pga-xc-fasm";
-  version = "unstable-2022-...";
+  version = "0.0.1";
 
   src = xcFasmSrc;
+  fasm = python3Packages.callPackage ./fasm.nix {};
 
-  pyproject = false;
+  dontConfigure = true;
   dontBuild = true;
-  doCheck = false;
+  format = "other";
 
   installPhase = ''
-    mkdir -p "$out/${python3Packages.python.sitePackages}"
+    runHook preInstall
+
+    install -d "$out/${python3Packages.python.sitePackages}"
     cp -r xc_fasm "$out/${python3Packages.python.sitePackages}/"
 
     mkdir -p "$out/bin"
@@ -20,9 +23,24 @@ python3Packages.buildPythonPackage rec {
         install -Dm755 "$f" "$out/bin/$(basename "$f" .py)"
       fi
     done
+
+    runHook postInstall
   '';
 
-  propagatedBuildInputs = with python3Packages; [
-    # put the actual runtime dependencies here
+  postInstall = ''
+    makeWrapper ${python3Packages.python.interpreter} $out/bin/xcfasm \
+      --add-flags "-m" \
+      --add-flags "xc_fasm.xc_fasm"
+  '';
+
+  dependencies = with python3Packages; [
+    bitarray
+    intervaltree
+    numpy
+    pyyaml
+    simplejson
+    fasm
   ];
+
+  pythonImportsCheck = [ "xc_fasm" ];
 }

@@ -7,7 +7,12 @@
 , archDefsDevice50t
 , vpr
 , xcFasm
+, xdcPlugin
 , prjxrayDb
+, which
+, yosys
+, coreutils
+, bash
 }:
 
 stdenvNoCC.mkDerivation rec {
@@ -62,9 +67,25 @@ SH
     # Conda environment. The exact source revision is supplied by the flake.
     cp -r ${f4pgaSrc}/f4pga $out/lib/f4pga
 
+    substituteInPlace $out/lib/f4pga/wrappers/tcl/xc7.f4pga.tcl \
+  --replace-fail 'plugin -i xdc' \
+    'plugin -i ${xdcPlugin}/lib/yosys/plugins/xdc.so' \
+  --replace-fail 'plugin -i fasm' \
+    'plugin -i ${xdcPlugin}/lib/yosys/plugins/fasm.so' \
+  --replace-fail 'plugin -i params' \
+    'plugin -i ${xdcPlugin}/lib/yosys/plugins/params.so' \
+  --replace-fail 'plugin -i sdc' \
+    'plugin -i ${xdcPlugin}/lib/yosys/plugins/sdc.so' \
+  --replace-fail 'plugin -i design_introspection' \
+    'plugin -i ${xdcPlugin}/lib/yosys/plugins/design_introspection.so'
+
+    substituteInPlace $out/lib/f4pga/wrappers/sh/__init__.py \
+  --replace-fail 'executable="/bin/bash"' 'executable="${bash}/bin/bash"'
+
     for tool in synth pack place route write_fasm write_bitstream; do
       cat > "$out/bin/symbiflow_$tool" <<EOF2
 #!${stdenvNoCC.shell}
+export PATH="${pythonEnv}/bin:${yosys}/bin:${which}/bin:${coreutils}/bin:$out/bin:\$PATH"
 export PYTHONPATH="$out/lib''${PYTHONPATH:+:\$PYTHONPATH}"
 export F4PGA_INSTALL_DIR='$out'
 export FPGA_FAM=xc7

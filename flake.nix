@@ -22,8 +22,8 @@
       url = "github:chipsalliance/f4pga-xc-fasm/25dc605c9c0896204f0c3425b52a332034cf5e5c";
       flake = false;
     };
-    prjxray-src = {
-      url = "github:f4pga/prjxray/ae546d6b7648bf4df9cf63f0b25b2028b5623c43";
+    yosys-f4pga-plugins = {
+      url = "github:chipsalliance/yosys-f4pga-plugins/v1.20230906";
       flake = false;
     };
   };
@@ -35,6 +35,10 @@
 
         pythonVersion = pkgs.python311;
         pythonPackages = pkgs.python311Packages;
+
+        prjxray = pkgs.callPackage ./dependencies/prjxray.nix { 
+          python3Packages = pythonPackages;
+        };
 
         pythonEnv = pythonVersion.withPackages (ps: with ps; [
           colorama
@@ -53,12 +57,8 @@
           sympy
           textx
           prjxray
+          xcFasm
         ]);
-
-        prjxray = pkgs.callPackage ./dependencies/prjxray.nix { 
-          python3Packages = pythonPackages;
-          prjxraySrc = inputs.prjxray-src;
-        };
 
         xcFasm = pkgs.callPackage ./dependencies/xc-fasm.nix {
           python3Packages = pythonPackages;
@@ -80,6 +80,11 @@
         archDefsDevice50t = pkgs.fetchurl {
           url = "https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/20220907-210059/symbiflow-arch-defs-xc7a50t_test-66a976d.tar.xz";
           hash = "sha256-gZ6dVMkYKGlWIBREv3i0gq6UsyAukAw99ZPQEsFY108=";
+        };
+
+        xdcPlugin = pkgs.callPackage ./dependencies/xdc-plugin.nix {
+          yosys = pkgs.yosys;
+          yosysPluginsSrc = inputs.yosys-f4pga-plugins;
         };
 
         archDefsDeviceExtracted100t = pkgs.runCommand "arch-defs-device-extracted" {
@@ -105,9 +110,10 @@
         '';
 
         f4pga = pkgs.callPackage ./dependencies/f4pga.nix {
-          inherit pythonEnv vpr xcFasm archDefsBase archDefsDevice100t archDefsDevice50t;
+          inherit pythonEnv vpr xcFasm archDefsBase archDefsDevice100t archDefsDevice50t xdcPlugin;
           f4pgaSrc = inputs.f4pga-src;
           prjxrayDb = inputs.prjxray-db;
+          yosys = pkgs.yosys;
         };
 
         anvil = pkgs.callPackage ./dependencies/anvil.nix {
@@ -132,7 +138,12 @@
 
             pkgsCross.riscv64-embedded.stdenv.cc
             verilog
+            xcFasm
+            prjxray
           ];
+
+          buildInputs = [xcFasm anvil f4pga vpr prjxray];
+          nativeBuildInputs = [xcFasm anvil f4pga vpr prjxray];
 
           shellHook = ''
             # expects riscv64-unknown-elf-g++ to be in PATH, but the cross compiler is named riscv64-none-elf-g++
