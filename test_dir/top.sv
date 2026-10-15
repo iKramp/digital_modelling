@@ -1,19 +1,4 @@
-function automatic [20:0] bin2bcd([15:0] val);
-    // integer i;
-    // reg [20:0] bcd;
-    // begin
-    //     bcd = 21'd0;
-    //     for (i = 15; i >= 0; i = i - 1) begin
-    //         bcd = {bcd[19:0], val[i]};
-    //         if (bcd[3:0] > 4'd4) bcd[3:0] = bcd[3:0] + 4'd3;
-    //         if (bcd[7:4] > 4'd4) bcd[7:4] = bcd[7:4] + 4'd3;
-    //         if (bcd[11:8] > 4'd4) bcd[11:8] = bcd[11:8] + 4'd3;
-    //         if (bcd[15:12] > 4'd4) bcd[15:12] = bcd[15:12] + 4'd3;
-    //         if (bcd[19:16] > 4'd4) bcd[19:16] = bcd[19:16] + 4'd3;
-    //     end
-    //     bin2bcd = bcd;
-    // end
-    //
+function automatic [19:0] bin2bcd([15:0] val);
     logic [19:0] bcd_out;
     integer i;
     logic [15:0] remainder, quotient;
