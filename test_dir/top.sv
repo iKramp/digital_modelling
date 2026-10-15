@@ -1,3 +1,36 @@
+function automatic [20:0] bin2bcd([15:0] val);
+    // integer i;
+    // reg [20:0] bcd;
+    // begin
+    //     bcd = 21'd0;
+    //     for (i = 15; i >= 0; i = i - 1) begin
+    //         bcd = {bcd[19:0], val[i]};
+    //         if (bcd[3:0] > 4'd4) bcd[3:0] = bcd[3:0] + 4'd3;
+    //         if (bcd[7:4] > 4'd4) bcd[7:4] = bcd[7:4] + 4'd3;
+    //         if (bcd[11:8] > 4'd4) bcd[11:8] = bcd[11:8] + 4'd3;
+    //         if (bcd[15:12] > 4'd4) bcd[15:12] = bcd[15:12] + 4'd3;
+    //         if (bcd[19:16] > 4'd4) bcd[19:16] = bcd[19:16] + 4'd3;
+    //     end
+    //     bin2bcd = bcd;
+    // end
+    //
+    logic [19:0] bcd_out;
+    integer i;
+    logic [15:0] remainder, quotient;
+    
+    // Process each decimal digit
+    bcd_out[3:0] = val % 10;
+    remainder = val / 10;
+    bcd_out[7:4] = remainder % 10;
+    remainder = remainder / 10;
+    bcd_out[11:8] = remainder % 10;
+    remainder = remainder / 10;
+    bcd_out[15:12] = remainder % 10;
+    bcd_out[19:16] = remainder % 10;
+    
+    bin2bcd = bcd_out;
+endfunction
+
 module segment_display (
     input logic [3:0]  num,
     output logic [6:0]  seg
@@ -38,41 +71,29 @@ module n_digit_display #(parameter N = 1) (
     output logic [N-1:0]   AN
 );
 
-    reg [5:0] counter = 6'd0;
-    logic [$clog2(N)-1:0] current_digit;
+    reg [6:0] counter = 7'd0;
+    logic [2:0] current_digit;
     logic display_enable;
     
     always_comb begin
-        display_enable <= (counter > 6'b010000 && counter < 6'b110000);
+        display_enable <= (counter > 7'b0110000 && counter < 7'b1000000);
     end
 
-    generate
-        genvar i;
-        for (i = 0; i < N; i = i + 1) begin : digit_selection
-            always_comb begin
-                if (current_digit == i) begin
-                    {SEG_TOP, SEG_TOP_RIGHT, SEG_BOT_RIGHT, SEG_BOT, SEG_BOT_LEFT, SEG_TOP_LEFT, SEG_CENTER} = segments[i*7 +: 7];
-                end
-            end
-        end
-
-        if (N > 8) begin
-            initial begin
-                $error("N cannot be greater than 8");
-            end
-        end
-    endgenerate
-
     always_comb begin
-        if (current_digit + 1 == N) begin
-            current_digit = {N{1'b0}};
-        end else begin
-            current_digit = current_digit + 1;
-        end
+        {SEG_TOP, SEG_TOP_RIGHT, SEG_BOT_RIGHT, SEG_BOT, SEG_BOT_LEFT, SEG_TOP_LEFT, SEG_CENTER} <= segments[current_digit*7 +: 7];
     end
 
     always @(posedge CLK) begin
         counter <= counter + 1;
+
+        if (counter == 0) begin
+            if (current_digit + 1 == N) begin
+                current_digit <= 0;
+            end else begin
+                current_digit <= current_digit + 1;
+            end
+        end
+
 
         if (display_enable) begin
             AN <= {N{1'b1}} ^ (1 << current_digit);
@@ -80,47 +101,36 @@ module n_digit_display #(parameter N = 1) (
             AN <= {N{1'b1}};
         end
     end
-
-
 endmodule
 
-module top #(parameter N = 8) (
-    input logic  [15:0]  SW,
-    input  wire       CLK100MHZ,
-    output logic         SEG_TOP,
-    output logic         SEG_TOP_RIGHT,
-    output logic         SEG_BOT_RIGHT,
-    output logic         SEG_BOT,
-    output logic         SEG_BOT_LEFT,
-    output logic         SEG_TOP_LEFT,
-    output logic         SEG_CENTER,
-    output logic [7:0]  AN,
+module n_digit_display_numbers #(parameter N = 1) (
+    input logic            CLK,
+    input logic [N*4-1:0]  numbers,
+    output logic           SEG_TOP,
+    output logic           SEG_TOP_RIGHT,
+    output logic           SEG_BOT_RIGHT,
+    output logic           SEG_BOT,
+    output logic           SEG_BOT_LEFT,
+    output logic           SEG_TOP_LEFT,
+    output logic           SEG_CENTER,
+    output logic [N-1:0]   AN
 );
 
-    reg [31:0] counter = 32'd0;
-    reg [29:0] increment_counter = 30'd0;
+    logic [N*7-1:0] segments;
 
-    logic [6:0] seg;
-    logic [6:0] out_seg;
-
-    assign {
-            SEG_TOP, 
-            SEG_TOP_RIGHT, 
-            SEG_BOT_RIGHT, 
-            SEG_BOT,
-            SEG_BOT_LEFT,
-            SEG_TOP_LEFT,
-            SEG_CENTER
-    } = out_seg;
-    
-    segment_display seg_disp (
-        .num(counter[3:0]),
-        .seg(seg)
-    );
+    genvar i;
+    generate
+        for (i = 0; i < N; i++) begin : gen_segment_display
+            segment_display seg_disp (
+                .num(numbers[i*4 +: 4]),
+                .seg(segments[i*7 +: 7])
+            );
+        end
+    endgenerate
 
     n_digit_display #(.N(N)) n_disp (
-        .CLK(CLK100MHZ),
-        .segments(seg),
+        .CLK(CLK),
+        .segments(segments),
         .SEG_TOP(SEG_TOP),
         .SEG_TOP_RIGHT(SEG_TOP_RIGHT),
         .SEG_BOT_RIGHT(SEG_BOT_RIGHT),
@@ -128,8 +138,54 @@ module top #(parameter N = 8) (
         .SEG_BOT_LEFT(SEG_BOT_LEFT),
         .SEG_TOP_LEFT(SEG_TOP_LEFT),
         .SEG_CENTER(SEG_CENTER),
-        .AN(AN[N-1:0])
+        .AN(AN)
     );
+endmodule
+
+module top #(parameter N = 4) (
+    input  logic [15:0]  SW,
+    input  logic         CLK100MHZ,
+    output logic         SEG_TOP,
+    output logic         SEG_TOP_RIGHT,
+    output logic         SEG_BOT_RIGHT,
+    output logic         SEG_BOT,
+    output logic         SEG_BOT_LEFT,
+    output logic         SEG_TOP_LEFT,
+    output logic         SEG_CENTER,
+    output logic         SEG_DECIMAL,
+    output logic [7:0]   AN
+);
+
+    reg [31:0] counter = 32'd0;
+    reg [29:0] increment_counter = 30'd0;
+
+    logic [6:0] seg0;
+    logic [6:0] seg1;
+    logic [6:0] seg2;
+    logic [6:0] seg3;
+
+    logic [7:0] tmp_an;
+
+    logic decimal_net[15:0];
+    assign decimal_net = bin2bcd(counter[15:0]);
+    
+    n_digit_display_numbers #(.N(N)) n_disp (
+        .CLK(CLK100MHZ),
+        .numbers(decimal_net),
+        .SEG_TOP(SEG_TOP),
+        .SEG_TOP_RIGHT(SEG_TOP_RIGHT),
+        .SEG_BOT_RIGHT(SEG_BOT_RIGHT),
+        .SEG_BOT(SEG_BOT),
+        .SEG_BOT_LEFT(SEG_BOT_LEFT),
+        .SEG_TOP_LEFT(SEG_TOP_LEFT),
+        .SEG_CENTER(SEG_CENTER),
+        .AN(tmp_an[N-1:0])
+    );
+
+    assign tmp_an[7:N] = -1; // Turn off unused anodes
+    assign AN = tmp_an;
+
+    assign SEG_DECIMAL = 1'b1; // Decimal point is always off
 
     always @(posedge CLK100MHZ) begin
         if (increment_counter + 1 == 30'd100000000) begin
