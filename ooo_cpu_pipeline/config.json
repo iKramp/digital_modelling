@@ -1,0 +1,15 @@
+{
+  "project": "test_dir",
+  "board": "Nexys-A7-100T",
+  "params": {},
+  "description": "Digilent Nexys A7 100T (xc7a100t)",
+  "target": "nexys4ddr",
+  "vpr_device": "xc7a100t_test",
+  "partname": "xc7a100tcsg324-1",
+  "device": "artix7",
+  "ofl_board": "nexys_a7_100",
+  "xdc": "Nexys-A7-100T-Master.xdc",
+  "schema": "2.0",
+  "version": "1.0.0",
+  "modules": {}
+}

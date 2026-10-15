@@ -140,6 +140,7 @@
             verilog
             xcFasm
             prjxray
+            svls
           ];
 
           buildInputs = [xcFasm anvil f4pga vpr prjxray];
