@@ -1,21 +1,3 @@
-function automatic [19:0] bin2bcd([15:0] val);
-    logic [19:0] bcd_out;
-    integer i;
-    logic [15:0] remainder, quotient;
-    
-    // Process each decimal digit
-    bcd_out[3:0] = val % 10;
-    remainder = val / 10;
-    bcd_out[7:4] = remainder % 10;
-    remainder = remainder / 10;
-    bcd_out[11:8] = remainder % 10;
-    remainder = remainder / 10;
-    bcd_out[15:12] = remainder % 10;
-    bcd_out[19:16] = remainder % 10;
-    
-    bin2bcd = bcd_out;
-endfunction
-
 module segment_display (
     input logic [3:0]  num,
     output logic [6:0]  seg
@@ -127,8 +109,8 @@ module n_digit_display_numbers #(parameter N = 1) (
     );
 endmodule
 
-module top #(parameter N = 4) (
-    input  logic [15:0]  SW,
+module top #(parameter N = 5) (
+    input  logic         CPU_RESETN,
     input  logic         CLK100MHZ,
     output logic         SEG_TOP,
     output logic         SEG_TOP_RIGHT,
@@ -151,8 +133,15 @@ module top #(parameter N = 4) (
 
     logic [7:0] tmp_an;
 
-    logic decimal_net[15:0];
-    assign decimal_net = bin2bcd(counter[15:0]);
+    logic decimal_net[19:0];
+    // assign decimal_net = bin2bcd(counter[15:0]);
+    bin_to_bcd #(.INPUT_WIDTH(16)) bcd_converter (
+        .clk(CLK100MHZ),
+        .rst_n(CPU_RESETN),
+        .in_valid(increment_counter == 30'd0),
+        .bin_in(counter[15:0]),
+        .bcd_out(decimal_net)
+    );
     
     n_digit_display_numbers #(.N(N)) n_disp (
         .CLK(CLK100MHZ),
@@ -172,8 +161,11 @@ module top #(parameter N = 4) (
 
     assign SEG_DECIMAL = 1'b1; // Decimal point is always off
 
-    always @(posedge CLK100MHZ) begin
-        if (increment_counter + 1 == 30'd100000000) begin
+    always @(posedge CLK100MHZ, negedge CPU_RESETN) begin
+        if (!CPU_RESETN) begin
+            counter <= 32'd0;
+            increment_counter <= 30'd0;
+        end else if (increment_counter + 1 == 30'd100000000) begin
             counter <= counter + 1;
             increment_counter <= 0;
         end else begin

@@ -141,6 +141,7 @@
             xcFasm
             prjxray
             svls
+            gtkwave
           ];
 
           buildInputs = [xcFasm anvil f4pga vpr prjxray];
