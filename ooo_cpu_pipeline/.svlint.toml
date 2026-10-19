@@ -1,0 +1,26 @@
+[option]
+# No mandatory copyright header.
+# Relax formatting limits.
+textwidth = 120
+indent = 4
+
+# [rules]
+# # Naming conventions: no forced prefixes.
+# prefix_module = false
+# prefix_interface = false
+# prefix_package = false
+# prefix_instance = false
+# prefix_input = false
+# prefix_output = false
+# prefix_inout = false
+# prefix_label = false
+#
+# # Relax style-only checks.
+# tab_character = false
+# wire_reg = false
+#
+# # Keep useful correctness checks.
+# blocking_assignment_in_always_ff = true
+# non_blocking_assignment_in_always_comb = true
+# case_default = true
+# default_nettype_none = false
