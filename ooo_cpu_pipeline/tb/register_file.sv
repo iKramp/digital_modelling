@@ -1,5 +1,7 @@
 `timescale 1ns/1ps
 
+`include "../modules/registers/register_file.sv"
+
 //will test with only 2 registers for now
 module tb_register_file;
 

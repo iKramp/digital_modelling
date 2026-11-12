@@ -1,3 +1,6 @@
+
+`include "formats.sv"
+
 module instruction_decode (
     input  logic [31:0] instruction,
     output logic [4:0]  rs1,
@@ -42,6 +45,7 @@ module instruction_decode (
     // Instantiate the format decoder
     format_decoder fd (
         .format(format),
+        .alternate_format(alternate_format),
         .instruction(instruction),
         .rs1(rs1),
         .rs1_valid(needs_rs1),

@@ -3,6 +3,7 @@
 ///reg_valid is used for fetching values
 module format_decoder (
     input  logic [1:0]  format, //0-R, 1-I, 2-S, 3-U
+    input  logic        alternate_format, //S -> B, U -> J
     input  logic [31:0] instruction,
     output logic [4:0]  rs1,
     output logic        rs1_valid,
@@ -28,6 +29,9 @@ module format_decoder (
     logic immS[31:0];
     logic immU[31:0];
 
+    logic immB[31:0];
+    logic immJ[31:0];
+
     assign immI = {
        { 20{instruction[31]} },
        instruction[31:20]
@@ -44,12 +48,28 @@ module format_decoder (
        { 12{1'b0} }
     };
 
+    assign immB = {
+       { 20{instruction[31]} },
+       instruction[7],
+       instruction[30:25],
+       instruction[11:8],
+       1'b0
+    };
+
+    assign immJ = {
+       { 12{instruction[31]} },
+       instruction[19:12],
+       instruction[20],
+       instruction[30:21],
+       1'b0
+    };
+
     always_comb begin
         case(format)
             2'd0: imm = immI; //no imm, short circuit to immI
             2'd1: imm = immI;
-            2'd2: imm = immS;
-            2'd3: imm = immU;
+            2'd2: imm = alternate_format ? immB : immS;
+            2'd3: imm = alternate_format ? immJ : immU;
         endcase
     end
 endmodule

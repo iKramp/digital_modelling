@@ -1,3 +1,5 @@
+`include "register.sv"
+
 module register_file #(
     parameter BIT = 32, 
     parameter N_REGS = 32, 

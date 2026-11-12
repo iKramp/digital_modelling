@@ -1,3 +1,24 @@
+module alu(
+    input logic [3:0]  A,
+    input logic [3:0]  B,
+    input logic [2:0]  ALU_FUN,
+    output logic [3:0] ALU_OUT
+);
+    always_comb begin
+        case (ALU_FUN)
+            3'b000: ALU_OUT = A + B; // Addition
+            3'b001: ALU_OUT = A - B; // Subtraction
+            3'b010: ALU_OUT = A & B; // AND
+            3'b011: ALU_OUT = A | B; // OR
+            3'b100: ALU_OUT = A ^ B; // XOR
+            3'b101: ALU_OUT = A == B ? 4'b1 : 4'b0; // CMP
+            3'b110: ALU_OUT = B; // pass A
+            3'b111: ALU_OUT = B; // pass B
+            default: ALU_OUT = 4'b0000;
+        endcase
+    end
+endmodule
+
 module segment_display (
     input logic [3:0]  num,
     output logic [6:0]  seg
@@ -112,6 +133,10 @@ endmodule
 module top #(parameter N = 5) (
     input  logic         CPU_RESETN,
     input  logic         CLK100MHZ,
+
+    input  logic [15:0]  SW,
+    output logic [15:0]  LED,
+
     output logic         SEG_TOP,
     output logic         SEG_TOP_RIGHT,
     output logic         SEG_BOT_RIGHT,
@@ -145,7 +170,7 @@ module top #(parameter N = 5) (
     
     n_digit_display_numbers #(.N(N)) n_disp (
         .CLK(CLK100MHZ),
-        .numbers(decimal_net),
+        .numbers(counter[15:0]),
         .SEG_TOP(SEG_TOP),
         .SEG_TOP_RIGHT(SEG_TOP_RIGHT),
         .SEG_BOT_RIGHT(SEG_BOT_RIGHT),
@@ -172,5 +197,4 @@ module top #(parameter N = 5) (
             increment_counter <= increment_counter + 1;
         end
     end
-
 endmodule

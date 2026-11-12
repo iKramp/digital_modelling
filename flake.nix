@@ -140,7 +140,6 @@
             verilog
             xcFasm
             prjxray
-            svls
             gtkwave
           ];
 

@@ -35,7 +35,7 @@ module top (
     output logic        CF,
     output logic        CG,
     output logic        CP,
-    output logic [7:0]  AN,
+    output logic [7:0]  AN
     // output logic [1:0]  LED
 );
     // segment_display seg_disp (
