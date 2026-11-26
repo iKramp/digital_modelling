@@ -22,7 +22,7 @@ module memory_controller #(
     input logic [1:0]             write2_width,
     input logic                   read2,
     wire        [BIT - 1:0]       data2,
-    output logic                  data2_valid
+    output logic                  data2_valid,
     
     //on memory side
     wire         [BUS_BIT - 1:0]  data_mem, //128 bit data bus

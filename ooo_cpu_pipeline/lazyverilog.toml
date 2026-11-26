@@ -1,0 +1,8 @@
+[design]
+
+[format]
+enable_format_on_save = false
+
+[lint.statement]
+enable = true
+case_missing_default = true

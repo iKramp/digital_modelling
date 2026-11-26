@@ -57,3 +57,4 @@ module instruction_decode (
         .funct3(funct3),
         .funct7(funct7)
     );
+endmodule

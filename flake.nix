@@ -28,37 +28,46 @@
     };
   };
 
-  outputs = { self, nixpkgs, flake-utils, ... }@inputs:
-    flake-utils.lib.eachDefaultSystem (system:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+      ...
+    }@inputs:
+    flake-utils.lib.eachDefaultSystem (
+      system:
       let
         pkgs = import nixpkgs { inherit system; };
 
         pythonVersion = pkgs.python311;
         pythonPackages = pkgs.python311Packages;
 
-        prjxray = pkgs.callPackage ./dependencies/prjxray.nix { 
+        prjxray = pkgs.callPackage ./dependencies/prjxray.nix {
           python3Packages = pythonPackages;
         };
 
-        pythonEnv = pythonVersion.withPackages (ps: with ps; [
-          colorama
-          bitarray
-          intervaltree
-          lxml
-          numpy
-          pyyaml
-          simplejson
-          ordered-set
-          parse
-          progressbar2
-          pyjson5
-          python-constraint
-          scipy
-          sympy
-          textx
-          prjxray
-          xcFasm
-        ]);
+        pythonEnv = pythonVersion.withPackages (
+          ps: with ps; [
+            colorama
+            bitarray
+            intervaltree
+            lxml
+            numpy
+            pyyaml
+            simplejson
+            ordered-set
+            parse
+            progressbar2
+            pyjson5
+            python-constraint
+            scipy
+            sympy
+            textx
+            prjxray
+            xcFasm
+          ]
+        );
 
         xcFasm = pkgs.callPackage ./dependencies/xc-fasm.nix {
           python3Packages = pythonPackages;
@@ -87,30 +96,47 @@
           yosysPluginsSrc = inputs.yosys-f4pga-plugins;
         };
 
-        archDefsDeviceExtracted100t = pkgs.runCommand "arch-defs-device-extracted" {
-          buildInputs = [ pkgs.xz ];
-        } ''
-          mkdir -p $out
-          tar -xJf ${archDefsDevice100t} -C $out
-        '';
-        archDefsDeviceExtracted50t = pkgs.runCommand "arch-defs-device-extracted" {
-          buildInputs = [ pkgs.xz ];
-        } ''
-          mkdir -p $out
-          tar -xJf ${archDefsDevice50t} -C $out
-        '';
+        archDefsDeviceExtracted100t =
+          pkgs.runCommand "arch-defs-device-extracted"
+            {
+              buildInputs = [ pkgs.xz ];
+            }
+            ''
+              mkdir -p $out
+              tar -xJf ${archDefsDevice100t} -C $out
+            '';
+        archDefsDeviceExtracted50t =
+          pkgs.runCommand "arch-defs-device-extracted"
+            {
+              buildInputs = [ pkgs.xz ];
+            }
+            ''
+              mkdir -p $out
+              tar -xJf ${archDefsDevice50t} -C $out
+            '';
 
         # merge. share/f4pha/arch/ is common. Link or copy inside
-        archDefsDeviceExtracted = pkgs.runCommand "arch-defs-device-extracted" {
-          buildInputs = [ pkgs.coreutils ];
-        } ''
-          mkdir -p $out/share/f4pga/arch
-          cp -r ${archDefsDeviceExtracted100t}/share/f4pga/arch/xc7a100t_test $out/share/f4pga/arch/
-          cp -r ${archDefsDeviceExtracted50t}/share/f4pga/arch/xc7a50t_test $out/share/f4pga/arch/
-        '';
+        archDefsDeviceExtracted =
+          pkgs.runCommand "arch-defs-device-extracted"
+            {
+              buildInputs = [ pkgs.coreutils ];
+            }
+            ''
+              mkdir -p $out/share/f4pga/arch
+              cp -r ${archDefsDeviceExtracted100t}/share/f4pga/arch/xc7a100t_test $out/share/f4pga/arch/
+              cp -r ${archDefsDeviceExtracted50t}/share/f4pga/arch/xc7a50t_test $out/share/f4pga/arch/
+            '';
 
         f4pga = pkgs.callPackage ./dependencies/f4pga.nix {
-          inherit pythonEnv vpr xcFasm archDefsBase archDefsDevice100t archDefsDevice50t xdcPlugin;
+          inherit
+            pythonEnv
+            vpr
+            xcFasm
+            archDefsBase
+            archDefsDevice100t
+            archDefsDevice50t
+            xdcPlugin
+            ;
           f4pgaSrc = inputs.f4pga-src;
           prjxrayDb = inputs.prjxray-db;
           yosys = pkgs.yosys;
@@ -122,9 +148,40 @@
           openfpgaloader = pkgs.openfpgaloader;
         };
 
-      in {
+        lazyVerilogVersion = "v2.2.0";
+        lazyVerilogUrl = "https://github.com/lazyverilog/LazyVerilog/releases/download/${lazyVerilogVersion}";
+
+        mkLazyBin =
+          { name, sha256 }:
+          pkgs.stdenv.mkDerivation {
+            name = "lazyverilog-${name}";
+            src = pkgs.fetchurl {
+              url = "${lazyVerilogUrl}/lazyverilog-${name}-${lazyVerilogVersion}-linux-x64-static";
+              inherit sha256;
+            };
+            phases = [ "installPhase" ];
+            installPhase = ''
+              mkdir -p $out/bin
+              cp $src $out/bin/lazyverilog-${name}
+              chmod +x $out/bin/lazyverilog-${name}
+            '';
+          };
+
+        lazyverilog-lsp = mkLazyBin {
+          name = "lsp";
+          sha256 = "sha256-Ps2KYkiUO/ITHXhIeZtYxnvBdxhVX3nF/P3rV2X0+LM=";
+        };
+
+      in
+      {
         packages = {
-          inherit anvil f4pga vpr prjxray xcFasm;
+          inherit
+            anvil
+            f4pga
+            vpr
+            prjxray
+            xcFasm
+            ;
           default = anvil;
         };
 
@@ -141,10 +198,23 @@
             xcFasm
             prjxray
             gtkwave
+            lazyverilog-lsp
           ];
 
-          buildInputs = [xcFasm anvil f4pga vpr prjxray];
-          nativeBuildInputs = [xcFasm anvil f4pga vpr prjxray];
+          buildInputs = [
+            xcFasm
+            anvil
+            f4pga
+            vpr
+            prjxray
+          ];
+          nativeBuildInputs = [
+            xcFasm
+            anvil
+            f4pga
+            vpr
+            prjxray
+          ];
 
           shellHook = ''
             # expects riscv64-unknown-elf-g++ to be in PATH, but the cross compiler is named riscv64-none-elf-g++
@@ -169,5 +239,6 @@
             exec zsh
           '';
         };
-      });
+      }
+    );
 }

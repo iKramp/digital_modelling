@@ -24,13 +24,7 @@ module cache_mod #(
     localparam CACHE_LINE_CNT_BITS = $clog2(CACHE_LINES);
     localparam ADDR_IGNORED_BITS = $clog2(BUS_BIT / 8);
     localparam CACHE_ADDR_BITS = ADDR_BIT - ADDR_IGNORED_BITS;
-    localparam IDLE = 0;
-    localparam WAITING_FOR_MEM_READ = 1;
-    localparam WAITING_FOR_MEM_WRITE = 2;
 
-    localparam OP_READ = 0;
-    localparam OP_WRITE = 1;
-    localparam OP_NONE = 2;
     reg [ADDR_BIT - 1:0] cpu_addr_reg;
 
     reg [BUS_BIT - 1:0] cache_data [CACHE_LINES - 1:0];
@@ -39,7 +33,13 @@ module cache_mod #(
     reg [CACHE_LINES - 1:0] cache_line_dirty;
 
     reg [CACHE_LINE_CNT_BITS - 1:0] cache_line_counter;
-    reg [1:0] state;
+    // reg [1:0] state;
+    typedef enum bit [1:0] {
+        IDLE,
+        WAITING_FOR_MEM_READ,
+        WAITING_FOR_MEM_WRITE
+    } state_t;
+    state_t state;
 
     logic addr_match;
     logic [CACHE_LINE_CNT_BITS - 1:0] matched_line;
@@ -113,7 +113,7 @@ module cache_mod #(
     endgenerate
 
 
-    logic [1:0] next_state;
+    state_t next_state;
 
     always_comb begin
         next_state = state;
@@ -131,42 +131,20 @@ module cache_mod #(
                 if (read && addr_match) begin
                     cpu_data_out = cache_data[matched_line][in_line_offset * 8 +: BIT];
                     cpu_data_valid = 1;
-                    mem_read = 0;
-                    mem_write = 0;
-                    mem_addr = 0;
                 end else if (read && !addr_match) begin
                     if (has_to_be_emptied) begin
                         next_state = WAITING_FOR_MEM_WRITE;
-                        cpu_data_valid = 0;
-                        mem_addr = cache_addr[empty_line];
-                        mem_read = 0;
-                        mem_write = 1;
                     end else begin
                         next_state = WAITING_FOR_MEM_READ;
-                        cpu_data_valid = 0;
-                        mem_addr = addr;
-                        mem_read = 1;
-                        mem_write = 0;
                     end
                 end else if (write && addr_match) begin
                     //cpu data written on posedge clk
                     cpu_data_valid = 1;
-                    mem_read = 0;
-                    mem_write = 0;
-                    mem_addr = 0;
                 end else if (write && !addr_match) begin
                     if (has_to_be_emptied) begin
                         next_state = WAITING_FOR_MEM_WRITE;
-                        cpu_data_valid = 0;
-                        mem_addr = cache_addr[empty_line];
-                        mem_read = 0;
-                        mem_write = 1;
                     end else begin
                         next_state = WAITING_FOR_MEM_READ;
-                        cpu_data_valid = 0;
-                        mem_addr = addr;
-                        mem_read = 1;
-                        mem_write = 0;
                     end
                 end
             end
@@ -175,7 +153,6 @@ module cache_mod #(
                     next_state = IDLE;
                 end
                 
-                cpu_data_valid = 0;
                 mem_addr = cpu_addr_reg;
                 mem_read = 1;
                 mem_write = 0;
@@ -185,11 +162,16 @@ module cache_mod #(
                     next_state = IDLE;
                 end
 
-                cpu_data_valid = 0;
                 mem_read = 0;
                 mem_write = 1;
                 mem_addr = cache_addr[selected_line];
                 mem_data_out = cache_data[selected_line];
+            end
+            default: begin
+                next_state = IDLE;
+                mem_read = 0;
+                mem_write = 0;
+                mem_addr = 0;
             end
         endcase
     end
@@ -226,24 +208,14 @@ module cache_mod #(
                             2'b01: cache_data[matched_line][in_line_offset * 8 +: 16] <= cpu_data[15:0];
                             2'b10: cache_data[matched_line][in_line_offset * 8 +: 32] <= cpu_data[31:0];
                             2'b11: cache_data[matched_line][in_line_offset * 8 +: 64] <= cpu_data_64bit;
+                            default: begin end
                         endcase
                         cache_line_dirty[matched_line] <= 1;
                     end
                 end
+                default: begin end
             endcase
             state <= next_state;
         end
-        $strobe("state=%d ready=%b valid=%b dirty=%b selected=%d mem_data=%h",
-            state,
-            mem_ready,
-            cache_line_valid,
-            cache_line_dirty,
-            selected_line,
-            mem_data
-        );
     end
-
-    always @(posedge clk) begin
-    end
-
 endmodule

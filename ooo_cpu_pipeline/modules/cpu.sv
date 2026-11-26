@@ -1,7 +1,7 @@
 
-`include "../stages/id_stage.sv"
-`include "../stages/ex_stage.sv"
-`include "../registes/register_file.sv"
+`include "stages/id_stage.sv"
+`include "stages/ex_stage.sv"
+`include "registers/register_file.sv"
 
 module cpu #(parameter BIT = 32) (
     input logic clk,
@@ -133,4 +133,5 @@ module cpu #(parameter BIT = 32) (
         .invalid_instruction(ex_mem_invalid_instruction)
     );
 
+    endmodule
 
